@@ -1,176 +1,127 @@
-# Convertisseur PDF vers RTF avec Custom GPT
+# 🤖 CSEM - Custom Selection Engine Manager
 
-Site web simple et résilient pour convertir des PDFs en RTF en utilisant un Custom GPT OpenAI.
+Gestionnaire de références de GPT personnalisés avec interface web intuitive.
 
-## Fonctionnalités
+## 📋 Fonctionnalités
 
-- Upload de multiples PDFs (jusqu'à 150 fichiers)
-- Traitement séquentiel résilient avec retry automatique
-- Sauvegarde de l'état pour reprendre après une interruption
-- Interface web moderne et intuitive
-- Support des Custom GPT OpenAI ou GPT-4 standard
-- Suivi en temps réel de la progression
+- ➕ **Ajouter** des références de Custom GPT avec nom, référence et description
+- 🗑️ **Supprimer** des références existantes
+- ✓ **Sélectionner** une référence active parmi toutes celles enregistrées
+- 💾 **Persistance automatique** des données avec LocalStorage
+- 🎨 Interface moderne et responsive
+- 🔔 Notifications pour chaque action
 
-## Installation
+## 🚀 Installation
 
-### 1. Prérequis
+Aucune installation nécessaire ! Il s'agit d'une application web statique.
 
-- Python 3.8+
-- Clé API OpenAI
+### Utilisation locale
 
-### 2. Installation des dépendances
-
+1. Clonez le repository :
 ```bash
-# Créer un environnement virtuel
-python -m venv venv
-
-# Activer l'environnement virtuel
-# Sur Linux/Mac:
-source venv/bin/activate
-# Sur Windows:
-venv\Scripts\activate
-
-# Installer les dépendances
-pip install -r requirements.txt
+git clone https://github.com/suaniafluence/csem.git
+cd csem
 ```
 
-### 3. Configuration
-
-Créer un fichier `.env` à la racine du projet:
-
+2. Ouvrez simplement `index.html` dans votre navigateur web préféré :
 ```bash
-cp .env.example .env
+# Sur Linux/Mac
+open index.html
+
+# Ou avec un serveur local (optionnel)
+python3 -m http.server 8000
+# Puis ouvrez http://localhost:8000
 ```
 
-Éditer le fichier `.env` et ajouter votre clé API OpenAI:
+## 💡 Utilisation
 
-```
-OPENAI_API_KEY=sk-your-api-key-here
-```
+### Ajouter une référence
 
-## Utilisation
+1. Remplissez le formulaire en haut de la page :
+   - **Nom du GPT** : Le nom de votre Custom GPT (ex: "Analyseur de Code")
+   - **Référence** : L'ID ou l'URL de votre GPT (ex: "g-abc123xyz" ou "https://...")
+   - **Description** (optionnel) : Une description de ce que fait ce GPT
 
-### 1. Démarrer le serveur
+2. Cliquez sur le bouton "➕ Ajouter"
 
-```bash
-python app.py
-```
+### Sélectionner une référence
 
-Le serveur démarre sur `http://localhost:5000`
+- Cliquez sur le bouton "✓ Sélectionner" sur la référence de votre choix
+- La référence sélectionnée apparaît dans la section "Référence sélectionnée" en bas de la page
+- La référence sélectionnée est mise en surbrillance en vert dans la liste
 
-### 2. Utiliser l'interface web
+### Supprimer une référence
 
-1. Ouvrez votre navigateur à `http://localhost:5000`
-2. (Optionnel) Entrez l'ID de votre Custom GPT (ex: `asst_xxxxxxxxxxxxx`)
-   - Laissez vide pour utiliser GPT-4 standard
-3. Cliquez sur la zone d'upload ou glissez-déposez vos PDFs
-4. Cliquez sur "Envoyer les fichiers"
-5. Cliquez sur "Démarrer la conversion"
-6. Suivez la progression en temps réel
+- Cliquez sur le bouton "🗑️ Supprimer" sur la référence à supprimer
+- Confirmez la suppression dans la boîte de dialogue
 
-### 3. Récupérer les fichiers convertis
-
-Les fichiers RTF convertis sont sauvegardés dans le dossier `outputs/`
-
-## Comment obtenir l'ID de votre Custom GPT
-
-1. Allez sur [OpenAI Platform](https://platform.openai.com/)
-2. Naviguez vers "Assistants"
-3. Sélectionnez votre Custom GPT
-4. Copiez l'ID qui commence par `asst_`
-
-## Architecture technique
-
-### Résilience
-
-- **Retry automatique**: 3 tentatives avec backoff exponentiel (2s, 4s, 8s)
-- **Sauvegarde d'état**: L'état du traitement est sauvegardé dans `processing_state.json`
-- **Reprise après crash**: Si le serveur crash, relancez-le et le traitement reprendra automatiquement
-
-### Structure des fichiers
+## 🏗️ Structure du projet
 
 ```
 csem/
-├── app.py                    # Backend Flask
-├── templates/
-│   └── index.html           # Interface web
-├── uploads/                 # PDFs uploadés (créé automatiquement)
-├── outputs/                 # RTFs générés (créé automatiquement)
-├── processing_state.json    # État du traitement (créé automatiquement)
-├── requirements.txt         # Dépendances Python
-├── .env                     # Configuration (à créer)
-└── README.md               # Ce fichier
+├── index.html      # Interface utilisateur
+├── styles.css      # Styles et design
+├── app.js          # Logique de l'application
+└── README.md       # Documentation
 ```
 
-### Endpoints API
+## 🔧 Fonctionnalités techniques
 
-- `GET /` - Interface web
-- `POST /upload` - Upload des PDFs
-- `POST /start-processing` - Démarre la conversion
-- `GET /status` - Récupère l'état actuel
-- `POST /reset` - Réinitialise l'état
-- `GET /download/<filename>` - Télécharge un fichier RTF
+- **Persistance** : Utilise LocalStorage du navigateur pour sauvegarder les données
+- **Responsive** : S'adapte à tous les écrans (mobile, tablette, desktop)
+- **Animations** : Transitions fluides et notifications élégantes
+- **Validation** : Vérification des champs obligatoires
+- **Sécurité** : Échappement HTML pour prévenir les injections XSS
 
-## Personnalisation
+## 📊 API JavaScript (pour développeurs)
 
-### Modifier le nombre max de fichiers
+L'application expose un objet global `gptManager` avec les méthodes suivantes :
 
-Dans `app.py`, ligne 13:
+```javascript
+// Ajouter une référence
+gptManager.addGPT();
 
-```python
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max
+// Supprimer une référence
+gptManager.removeGPT(id);
+
+// Sélectionner une référence
+gptManager.selectGPT(id);
+
+// Exporter les données (bonus)
+gptManager.exportData();
+
+// Importer des données (bonus)
+gptManager.importData(file);
 ```
 
-### Modifier le nombre de retries
+## 🎨 Personnalisation
 
-Dans `app.py`, ligne 44:
+Les couleurs peuvent être modifiées dans `styles.css` en changeant les variables CSS :
 
-```python
-def process_pdf_with_gpt(pdf_path, custom_gpt_id=None, max_retries=3):
+```css
+:root {
+    --primary-color: #2563eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    /* etc. */
+}
 ```
 
-### Traitement asynchrone
+## 🌐 Compatibilité
 
-Pour un traitement asynchrone en arrière-plan (recommandé pour la production), considérez l'utilisation de:
-- Celery avec Redis
-- RQ (Redis Queue)
-- Python asyncio
+- Chrome/Edge (recommandé)
+- Firefox
+- Safari
+- Tout navigateur moderne supportant ES6 et LocalStorage
 
-## Dépannage
-
-### Erreur "OPENAI_API_KEY non configurée"
-
-Vérifiez que:
-1. Le fichier `.env` existe
-2. La clé API est correcte
-3. L'environnement virtuel est activé
-
-### Les fichiers ne sont pas traités
-
-1. Vérifiez les logs de la console
-2. Consultez `processing_state.json` pour voir les erreurs
-3. Vérifiez que l'ID du Custom GPT est correct
-
-### Le serveur est lent
-
-Le traitement est séquentiel par défaut. Pour accélérer:
-1. Utilisez un traitement asynchrone (Celery)
-2. Réduisez la taille des PDFs
-3. Utilisez un serveur plus puissant
-
-## Limites
-
-- Les PDFs très volumineux (>20 MB) peuvent prendre du temps
-- L'API OpenAI a des limites de taux (rate limits)
-- La qualité de la conversion dépend du Custom GPT utilisé
-
-## Sécurité
-
-- Ne commitez JAMAIS votre fichier `.env`
-- Utilisez HTTPS en production
-- Limitez l'accès au serveur
-- Validez les fichiers uploadés
-
-## Licence
+## 📝 Licence
 
 MIT
+
+## 👤 Auteur
+
+Suan (suan.tay.job@gmail.com)
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.

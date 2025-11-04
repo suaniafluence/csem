@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom GPT References Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Gestionnaire de Références Custom GPT</h1>
+            <p>Gérez vos références de GPT personnalisés</p>
+        </header>
+
+        <main>
+            <!-- Section d'ajout -->
+            <section class="add-section">
+                <h2>Ajouter une nouvelle référence</h2>
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="gptName">Nom du GPT:</label>
+                        <input type="text" id="gptName" placeholder="Ex: Analyseur de Code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gptRef">Référence (ID ou URL):</label>
+                        <input type="text" id="gptRef" placeholder="Ex: g-abc123xyz ou https://..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gptDescription">Description (optionnel):</label>
+                        <textarea id="gptDescription" placeholder="Description de ce GPT..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span>➕</span> Ajouter
+                    </button>
+                </form>
+            </section>
+
+            <!-- Section de la liste -->
+            <section class="list-section">
+                <div class="list-header">
+                    <h2>Références enregistrées</h2>
+                    <span id="countBadge" class="count-badge">0</span>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <p>📝 Aucune référence enregistrée</p>
+                    <p class="empty-text">Ajoutez votre première référence ci-dessus</p>
+                </div>
+
+                <div id="gptList" class="gpt-list"></div>
+            </section>
+
+            <!-- Section de sélection -->
+            <section class="selection-section">
+                <h2>Référence sélectionnée</h2>
+                <div id="selectedGPT" class="selected-gpt">
+                    <p class="no-selection">Aucune référence sélectionnée</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
