@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur PDF vers RTF</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-zone.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .status-label {
+            color: #666;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+
+        .file-item {
+            padding: 8px;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-item::before {
+            content: '📄';
+            margin-right: 8px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Convertisseur PDF vers RTF</h1>
+        <p class="subtitle">Chargez jusqu'à 150 PDFs et convertissez-les en RTF avec votre Custom GPT</p>
+
+        <div class="section">
+            <div class="section-title">Configuration</div>
+            <input type="text" id="customGptId" placeholder="ID de votre Custom GPT (optionnel - ex: asst_xxxxx)">
+            <small style="color: #666; font-size: 12px;">Laissez vide pour utiliser GPT-4 standard</small>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Upload des PDFs</div>
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept=".pdf" multiple style="display: none;">
+                <div style="font-size: 48px; margin-bottom: 15px;">📁</div>
+                <p style="font-size: 16px; color: #667eea; font-weight: 600; margin-bottom: 8px;">
+                    Cliquez ou glissez-déposez vos PDFs ici
+                </p>
+                <p style="font-size: 13px; color: #999;">
+                    Supporté: jusqu'à 150 fichiers PDF
+                </p>
+            </div>
+            <div id="fileList" class="file-list" style="display: none;"></div>
+        </div>
+
+        <div class="button-group">
+            <button id="uploadBtn" style="display: none;">📤 Envoyer les fichiers</button>
+            <button id="startBtn" style="display: none;">▶️ Démarrer la conversion</button>
+            <button id="resetBtn" style="display: none;">🔄 Recommencer</button>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="status" id="status">
+                <div class="status-item">
+                    <span class="status-label">Statut:</span>
+                    <span class="status-value" id="statusText">En attente...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Progression:</span>
+                    <span class="status-value" id="progressText">0 / 0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Réussis:</span>
+                    <span class="status-value" id="successText">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Échoués:</span>
+                    <span class="status-value" id="failedText">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const messageContainer = document.getElementById('messageContainer');
+
+        let selectedFiles = [];
+
+        // Gestion du clic sur la zone d'upload
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        // Gestion du drag & drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // Gestion de la sélection de fichiers
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files).filter(f => f.name.endsWith('.pdf'));
+
+            if (selectedFiles.length === 0) {
+                showMessage('Veuillez sélectionner des fichiers PDF', 'error');
+                return;
+            }
+
+            // Afficher la liste des fichiers
+            fileList.innerHTML = selectedFiles.map(f =>
+                `<div class="file-item">${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)</div>`
+            ).join('');
+            fileList.style.display = 'block';
+            uploadBtn.style.display = 'block';
+        }
+
+        // Upload des fichiers
+        uploadBtn.addEventListener('click', async () => {
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files[]', file);
+            });
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '📤 Upload en cours...';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`✅ ${data.files.length} fichiers uploadés avec succès!`, 'success');
+                    startBtn.style.display = 'block';
+                    uploadBtn.style.display = 'none';
+                } else {
+                    showMessage(`❌ Erreur: ${data.error}`, 'error');
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = '📤 Envoyer les fichiers';
+                }
+            } catch (error) {
+                showMessage(`❌ Erreur d'upload: ${error.message}`, 'error');
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '📤 Envoyer les fichiers';
+            }
+        });
+
+        // Démarrer le traitement
+        startBtn.addEventListener('click', async () => {
+            const customGptId = document.getElementById('customGptId').value.trim();
+
+            startBtn.disabled = true;
+            startBtn.textContent = '⏳ Traitement en cours...';
+            progressContainer.style.display = 'block';
+
+            try {
+                // Démarrer le traitement
+                const response = await fetch('/start-processing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ custom_gpt_id: customGptId || null })
+                });
+
+                // Polling pour suivre la progression
+                const pollInterval = setInterval(async () => {
+                    const statusResponse = await fetch('/status');
+                    const status = await statusResponse.json();
+
+                    updateProgress(status);
+
+                    if (status.status === 'completed') {
+                        clearInterval(pollInterval);
+                        startBtn.style.display = 'none';
+                        resetBtn.style.display = 'block';
+                        showMessage('✅ Traitement terminé!', 'success');
+                    }
+                }, 2000);
+
+            } catch (error) {
+                showMessage(`❌ Erreur: ${error.message}`, 'error');
+                startBtn.disabled = false;
+                startBtn.textContent = '▶️ Démarrer la conversion';
+            }
+        });
+
+        // Réinitialiser
+        resetBtn.addEventListener('click', async () => {
+            if (confirm('Voulez-vous vraiment réinitialiser?')) {
+                await fetch('/reset', { method: 'POST' });
+                location.reload();
+            }
+        });
+
+        function updateProgress(status) {
+            const progress = status.progress || 0;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressFill').textContent = progress.toFixed(1) + '%';
+            document.getElementById('statusText').textContent = status.status;
+            document.getElementById('progressText').textContent = `${status.current} / ${status.total}`;
+            document.getElementById('successText').textContent = status.processed;
+            document.getElementById('failedText').textContent = status.failed;
+        }
+
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Charger le statut au chargement de la page
+        window.addEventListener('load', async () => {
+            const response = await fetch('/status');
+            const status = await response.json();
+
+            if (status.total > 0) {
+                progressContainer.style.display = 'block';
+                updateProgress(status);
+
+                if (status.status === 'completed') {
+                    resetBtn.style.display = 'block';
+                } else if (status.status === 'processing') {
+                    startBtn.style.display = 'block';
+                    startBtn.disabled = true;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
